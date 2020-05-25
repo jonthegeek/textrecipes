@@ -154,19 +154,16 @@ bake.step_texthash <- function(object, new_data, ...) {
   # for backward compat
 
   for (i in seq_along(col_names)) {
+    
+    tokens <- get_tokens(new_data[, col_names[i], drop = TRUE])
 
-    tf_text <- hashing_function(get_tokens(new_data[, col_names[i], drop = TRUE]),
-                                paste0(col_names[i], "_",
-                                       names0(object$num_terms, object$prefix)),
+    tf_text <- hashing_function(tokens,
                                 object$signed,
                                 object$num_terms)
-
-    new_data <-
-      new_data[, !(colnames(new_data) %in% col_names[i]), drop = FALSE]
     
-    new_data <- vctrs::vec_cbind(tf_text, new_data)
+    new_data[, col_names[i]] <- tf_text
   }
-
+  
   as_tibble(new_data)
 }
 
@@ -197,18 +194,13 @@ tidy.step_texthash <- function(x, ...) {
 }
 
 # Implementation
-hashing_function <- function(data, labels, signed, n) {
-  
-  counts <- list_to_hash(data, n, signed)
-  
-  colnames(counts) <- labels
-  as_tibble(counts)
-}
-
 # Takes a [tokenlist] and calculate the hashed token count matrix
-list_to_hash <- function(x, n, signed) {
-  it <- text2vec::itoken(x, progress = FALSE)
+hashing_function <- function(data, signed, n) {
+  it <- text2vec::itoken(data, progress = FALSE)
   vectorizer <- text2vec::hash_vectorizer(hash_size = n, signed_hash = signed)
-  as.matrix(text2vec::create_dtm(it, vectorizer))
+  sparse_mat <- text2vec::create_dtm(it, vectorizer)
+  sparse_list <- purrr::map(seq_len(nrow(sparse_mat)),
+                            ~sparse_mat[.x,, drop = FALSE])
+  tibble(sparse_list)
 }
 
