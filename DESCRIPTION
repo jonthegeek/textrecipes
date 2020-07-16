@@ -1,6 +1,6 @@
 Package: textrecipes
 Title: Extra 'Recipes' for Text Processing
-Version: 0.2.3.9000
+Version: 0.3.0.9000
 Authors@R: 
     person(given = "Emil",
            family = "Hvitfeldt",
@@ -41,7 +41,8 @@ Suggests:
     stopwords,
     testthat (>= 2.1.0),
     text2vec,
-    textfeatures (>= 0.3.3)
+    textfeatures (>= 0.3.3),
+    stringi
 LinkingTo: 
     Rcpp
 VignetteBuilder: 
@@ -49,5 +50,5 @@ VignetteBuilder:
 Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.1.0.9000
+RoxygenNote: 7.1.1
 SystemRequirements: GNU make, C++11

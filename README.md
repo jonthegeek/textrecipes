@@ -1,7 +1,7 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# textrecipes
+# textrecipes <a href='https://textrecipes.tidymodels.org'><img src='man/figures/logo.png' align="right" height="139" /></a>
 
 <!-- badges: start -->
 
@@ -89,24 +89,25 @@ of list columns. To avoid confusion, here is a table of steps with their
 expected input and output respectively. Notice how you need to end with
 numeric for future analysis to work.
 
-| Step                     | Input         | Output        |
-| ------------------------ | ------------- | ------------- |
-| `step_tokenize()`        | character     | `tokenlist()` |
-| `step_untokenize()`      | `tokenlist()` | character     |
-| `step_lemma()`           | `tokenlist()` | `tokenlist()` |
-| `step_stem()`            | `tokenlist()` | `tokenlist()` |
-| `step_stopwords()`       | `tokenlist()` | `tokenlist()` |
-| `step_pos_filter()`      | `tokenlist()` | `tokenlist()` |
-| `step_ngram()`           | `tokenlist()` | `tokenlist()` |
-| `step_tokenfilter()`     | `tokenlist()` | `tokenlist()` |
-| `step_tokenmerge()`      | `tokenlist()` | `tokenlist()` |
-| `step_tfidf()`           | `tokenlist()` | numeric       |
-| `step_tf()`              | `tokenlist()` | numeric       |
-| `step_texthash()`        | `tokenlist()` | numeric       |
-| `step_word_embeddings()` | `tokenlist()` | numeric       |
-| `step_textfeature()`     | character     | numeric       |
-| `step_sequence_onehot()` | character     | numeric       |
-| `step_lda()`             | character     | numeric       |
+| Step                        | Input         | Output        |
+| --------------------------- | ------------- | ------------- |
+| `step_tokenize()`           | character     | `tokenlist()` |
+| `step_untokenize()`         | `tokenlist()` | character     |
+| `step_lemma()`              | `tokenlist()` | `tokenlist()` |
+| `step_stem()`               | `tokenlist()` | `tokenlist()` |
+| `step_stopwords()`          | `tokenlist()` | `tokenlist()` |
+| `step_pos_filter()`         | `tokenlist()` | `tokenlist()` |
+| `step_ngram()`              | `tokenlist()` | `tokenlist()` |
+| `step_tokenfilter()`        | `tokenlist()` | `tokenlist()` |
+| `step_tokenmerge()`         | `tokenlist()` | `tokenlist()` |
+| `step_tfidf()`              | `tokenlist()` | numeric       |
+| `step_tf()`                 | `tokenlist()` | numeric       |
+| `step_texthash()`           | `tokenlist()` | numeric       |
+| `step_word_embeddings()`    | `tokenlist()` | numeric       |
+| `step_textfeature()`        | character     | numeric       |
+| `step_sequence_onehot()`    | character     | numeric       |
+| `step_lda()`                | character     | numeric       |
+| `step_text_normalization()` | character     | character     |
 
 This means that valid sequences includes
 
@@ -125,3 +126,24 @@ recipe(~ ., data = data) %>%
   step_stem(text) %>%
   step_tfidf(text)
 ```
+
+## Contributing
+
+This project is released with a [Contributor Code of
+Conduct](https://contributor-covenant.org/version/2/0/CODE_OF_CONDUCT.html).
+By contributing to this project, you agree to abide by its terms.
+
+  - For questions and discussions about tidymodels packages, modeling,
+    and machine learning, please [post on RStudio
+    Community](https://rstd.io/tidymodels-community).
+
+  - If you think you have encountered a bug, please [submit an
+    issue](https://github.com/tidymodels/textrecipes/issues).
+
+  - Either way, learn how to create and share a
+    [reprex](https://rstd.io/reprex) (a minimal, reproducible example),
+    to clearly communicate about your code.
+
+  - Check out further details on [contributing guidelines for tidymodels
+    packages](https://www.tidymodels.org/contribute/) and [how to get
+    help](https://www.tidymodels.org/help/).
