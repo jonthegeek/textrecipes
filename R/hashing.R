@@ -41,7 +41,7 @@
 #' library(modeldata)
 #' data(okc_text)
 #' 
-#' okc_rec <- recipe(~ ., data = okc_text) %>%
+#' okc_rec <- recipe(~ essay0, data = okc_text) %>%
 #'   step_tokenize(essay0) %>%
 #'   step_tokenfilter(essay0, max_tokens = 10) %>%
 #'   step_texthash(essay0)
@@ -159,7 +159,9 @@ bake.step_texthash <- function(object, new_data, ...) {
 
     tf_text <- hashing_function(tokens,
                                 object$signed,
-                                object$num_terms)
+                                object$num_terms,
+                                col_names[i])
+    
     
     new_data[, col_names[i]] <- tf_text
   }
@@ -195,12 +197,15 @@ tidy.step_texthash <- function(x, ...) {
 
 # Implementation
 # Takes a [tokenlist] and calculate the hashed token count matrix
-hashing_function <- function(data, signed, n) {
+hashing_function <- function(data, signed, n, name) {
   it <- text2vec::itoken(data, progress = FALSE)
   vectorizer <- text2vec::hash_vectorizer(hash_size = n, signed_hash = signed)
   sparse_mat <- text2vec::create_dtm(it, vectorizer)
-  sparse_list <- purrr::map(seq_len(nrow(sparse_mat)),
-                            ~sparse_mat[.x,, drop = FALSE])
-  tibble(sparse_list)
+  sparse_mat@Dimnames <- list(NULL, paste0(name, "_", seq_len(n)))
+  sparse_list <- recipes::CsparseMatrix_to_RsparseList(sparse_mat)
+  
+  res <- tibble(sparse_list)
+  names(res) <- name
+  res
 }
 
