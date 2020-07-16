@@ -160,7 +160,8 @@ bake.step_texthash <- function(object, new_data, ...) {
     tf_text <- hashing_function(tokens,
                                 object$signed,
                                 object$num_terms,
-                                col_names[i])
+                                col_names[i],
+                                object$prefix)
     
     
     new_data[, col_names[i]] <- tf_text
@@ -197,11 +198,11 @@ tidy.step_texthash <- function(x, ...) {
 
 # Implementation
 # Takes a [tokenlist] and calculate the hashed token count matrix
-hashing_function <- function(data, signed, n, name) {
+hashing_function <- function(data, signed, n, name, prefix) {
   it <- text2vec::itoken(data, progress = FALSE)
   vectorizer <- text2vec::hash_vectorizer(hash_size = n, signed_hash = signed)
   sparse_mat <- text2vec::create_dtm(it, vectorizer)
-  sparse_mat@Dimnames <- list(NULL, paste0(name, "_", seq_len(n)))
+  sparse_mat@Dimnames <- list(NULL, paste0(name, "_", prefix, seq_len(n)))
   sparse_list <- recipes::CsparseMatrix_to_RsparseList(sparse_mat)
   
   res <- tibble(sparse_list)
