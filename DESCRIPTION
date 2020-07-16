@@ -47,6 +47,8 @@ LinkingTo:
     Rcpp
 VignetteBuilder: 
     knitr
+Remotes:
+    EmilHvitfeldt/recipes@sparse-column
 Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)

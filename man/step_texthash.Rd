@@ -96,7 +96,7 @@ library(recipes)
 library(modeldata)
 data(okc_text)
 
-okc_rec <- recipe(~ ., data = okc_text) \%>\%
+okc_rec <- recipe(~ essay0, data = okc_text) \%>\%
   step_tokenize(essay0) \%>\%
   step_tokenfilter(essay0, max_tokens = 10) \%>\%
   step_texthash(essay0)
