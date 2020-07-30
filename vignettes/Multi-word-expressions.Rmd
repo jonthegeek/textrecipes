@@ -1,0 +1,139 @@
+---
+title: "Dealing with Multi-Word Expressions"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{dealing-with-multi-word-expressions}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(textrecipes)
+```
+
+textrecipes doesn't define any steps to deal with multi-work expressions directly. However, there are still ways you can handle them.
+We start by creating a small dataset with common multi-work expressions
+
+```{r}
+library(tibble)
+example_data <- tibble(text = c("George Washington was a president of the United States",
+                                "New York is a city in United States",
+                                "Many city names are comprised of multiple words"))
+
+example_data
+```
+
+## Compound multi-word expressions before tokenizing
+
+On way to deal with this problem is to compound known multi-word expressions before tokenization such that tokenization doesn't split them. We can use `str_replace_all()` to compound words.
+
+We start by creating a named vector of our known multi-word expressions. The names should be the expression as they appear in the text and the value should be the replacement.
+
+```{r}
+library(stringr)
+mwe <- c("George Washington" = "George_Washington",
+         "United States" = "United_States",
+         "New York" = "New_York")
+```
+
+Then we can use `str_replace_all()` inside `step_mutate()` to conduct the replacements.
+
+```{r}
+rec_spec1 <- recipe(~ text, data = example_data) %>%
+  step_mutate(text = str_replace_all(text, mwe)) %>%
+  step_tokenize(text) %>%
+  step_tf(text)
+
+rec_spec1 %>%
+  prep() %>%
+  juice() %>%
+  names()
+```
+You need to be careful when you create the replacements. The following tokenizer will split the tokens by non-alphanumeric characters which include the underscore we have used and it will result in the multi-word expressions being split by the tokenizer.
+
+```{r}
+alpha_num_tokenizer <- function(x) {
+  str_split(x, "[^[:alnum:]]")
+}
+
+rec_spec2 <- recipe(~ text, data = example_data) %>%
+  step_mutate(text = str_replace_all(text, mwe)) %>%
+  step_tokenize(text, custom_token = alpha_num_tokenizer) %>%
+  step_tf(text)
+
+rec_spec2 %>%
+  prep() %>%
+  juice() %>%
+  names()
+```
+
+In that case, then the simplest remedy is to update the `mwe` vector to be more robust.
+
+```{r}
+mwe <- c("George Washington" = "GeorgeWashington",
+         "United States" = "UnitedStates",
+         "New York" = "NewYork")
+
+rec_spec3 <- recipe(~ text, data = example_data) %>%
+  step_mutate(text = str_replace_all(text, mwe)) %>%
+  step_tokenize(text, custom_token = alpha_num_tokenizer) %>%
+  step_tf(text)
+
+rec_spec3 %>%
+  prep() %>%
+  juice() %>%
+  names()
+```
+
+## Create custom tokenizer
+
+Other packages offer methods to infer certain multi-word expressions. The [spacyr](http://spacyr.quanteda.io/) package offers a way to extract entities.
+
+```{r}
+library(spacyr)
+spacy_tokens <- spacy_parse(example_data$text, entity = TRUE, lemma = FALSE)
+spacy_tokens
+```
+
+the `entity_consolidate()` function can be used to combine entities can comprise of multiple tokens.
+
+```{r}
+entity_consolidate(spacy_tokens)
+```
+
+We can then create a function that works with `step_tokenize()`.
+
+```{r}
+spacy_entity <- function(x) {
+  tokens <- spacy_parse(x, entity = TRUE, lemma = FALSE)
+  tokens <- entity_consolidate(tokens)
+  token_list <- split(tokens$token, tokens$doc_id)
+  names(token_list) <- gsub("text", "", names(token_list))
+  res <- unname(token_list[as.character(seq_along(x))])
+  empty <- lengths(res) == 0
+  res[empty] <- lapply(seq_len(sum(empty)), function(x) character(0))
+  res
+}
+
+spacy_entity(example_data$text)
+```
+
+We can now supply this custom tokenizer to be used seamlessly with `step_tokenize()`.
+
+```{r}
+rec_spec4 <- recipe(~ text, data = example_data) %>%
+  step_tokenize(text, custom_token = spacy_entity) %>%
+  step_tf(text)
+
+rec_spec4 %>%
+  prep() %>%
+  juice() %>%
+  names()
+```
